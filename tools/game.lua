@@ -114,9 +114,9 @@ end
 
 function checkDis(x1, y1, x2, y2)
 	local tx = x2 - x1
-	local ty = y1 - y2
+	local ty = y2 - y1
 
-	local angle = (math.atan2(ty, tx) / math.pi*2)
+	local angle = (math.atan2(ty, tx) / math.pi)
 	local dis = ((tx^2) + (ty^2))
 	dis = math.sqrt(dis)
 return dis, angle

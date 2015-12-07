@@ -41,8 +41,8 @@ function hudUpdate(dt)
 	hud.weapon.reload.y = player.y - 50
 
 	
-	local mx, my = lm.getX() + (-player.x + lg.getWidth()/2), lm.getY() + (-player.x + lg.getHeight()/2)
-	local dis, angle = checkDis(mx, my, player.x, player.y)
+	local mx, my = lm.getX(), lm.getY()
+	local dis, angle = checkDis(player.x - lg.getWidth()/2, player.y - lg.getHeight()/2, mx, my)
 	tDis = dis
 	tAngle = angle
 

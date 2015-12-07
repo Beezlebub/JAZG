@@ -29,11 +29,17 @@ function player:update(dt)
 	end
 
 	if self.health <= 0 then
+
 		--	END GAME	-------------------------
 	end
 end
 
 function player:draw(color)
-	drawCircle(self, color)
+	if player.health > 0 then
+		drawCircle(self, color)
+	else
+		lg.setColor(255, 100, 100)
+		lg.print("DEAD", 500, 500)
+	end
 end
 
