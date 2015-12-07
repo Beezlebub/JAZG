@@ -1,5 +1,8 @@
 
 function hudLoad()
+	mouseX = 0
+	mouseY = 0
+
 	camSettings = {}
 	camSettings.x = 0
 	camSettings.y = 0
@@ -42,10 +45,12 @@ function hudUpdate(dt)
 
 	
 	local mx, my = lm.getX(), lm.getY()
-	local dis, angle = checkDis(player.x - lg.getWidth()/2, player.y - lg.getHeight()/2, mx, my)
+	local dis, angle = checkDis(player.x, player.y, mouseX, mouseY)
 	tDis = dis
 	tAngle = angle
 
+	mouseX = lm.getX() + player.x -(lg.getWidth()/2 + player.rad)
+	mouseY = lm.getY() + player.y -(lg.getHeight()/2 + player.rad)
 end
 
 function hud1Draw()
@@ -67,8 +72,12 @@ end
 function hud2Draw()
 
 	lg.setColor(255, 255, 255)
-	lg.print(tDis, 10, 10)
-	lg.print(tAngle, 10, 30)
+	lg.print("Dis =		" .. tDis, 10, 10)
+	lg.print("Angle =	" .. tAngle, 10, 30)
+	lg.print("mX =		" .. mouseX, 10, 50)
+	lg.print("mY =		" .. mouseY, 10, 70)
+	lg.print("pX =		" .. player.x, 10, 90)
+	lg.print("pY =		" .. player.y, 10, 110)
 
 	drawRect(hud.weapon, {80,80,80})
 	drawRect(hud.weapon.ammo, {180,180,80})

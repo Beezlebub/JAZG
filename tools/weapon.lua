@@ -5,26 +5,13 @@ function bullet:initialize(x, y, angle, damage)
 	self.y = gun.y
 	self.damage = damage
 
-	local dis, angle = checkDis(self.x, self.y, x, y)
+	local dis, angle = checkDis(self.x, self.y, mouseX, mouseY)
 	self.angle = angle
-end
-
-function bullet:remove()
-	table.remove(bullets, i)
 end
 
 function bullet:update(dt)
 	self.x = self.x + math.sin(self.angle) * bulletSpeed * dt
-	self.y = self.y + math.cos(-self.angle) * bulletSpeed * dt
-
-	for i = #zombie, 1, -1 do
-		local dis, angle = checkDis(self.x, self.y, zombie[i].x, zombie[i].y)
-		if dis < zombie[i].rad then
-			zombie[i].health = zombie[i].health - self.damage
-			bullet:remove(self)
-		end
-	end
-
+	self.y = self.y + math.cos(self.angle) * bulletSpeed * dt
 end
 
 function bullet:draw(color)
@@ -39,10 +26,10 @@ function weaponLoad()
 	gun.x = 0
 	gun.y = 0
 	gun.rad = 10
-	gun.dis = 40
+	gun.dis = 30
 
 	bullets = {}
-	bulletSpeed = 200
+	bulletSpeed = 500
 
 	---------------------------------------------
 
@@ -98,7 +85,7 @@ function weaponLoad()
 	weapon[5].magBullets = 7
 	weapon[5].magMax = 7
 	weapon[5].allBullets = 21
-	weapon[5].fireRate = .2
+	weapon[5].fireRate = 1
 	weapon[5].fireMode = 0
 	weapon[5].reloadTime = 3.0
 end
@@ -112,7 +99,9 @@ function weaponUpdate(dt)
 	if not weapon.isReloading and weapon.btnDown then
 		if weapon.canShoot then
 			if weapon[weapon.use].magBullets > 0 then
-				createBullet()
+				local dis, angle = checkDis(player.x, player.y, mouseX, mouseY)
+				bullets[#bullets+1] = bullet:new(player.x, player.y, angle, weapon[weapon.use].damage)
+				
 				weapon[weapon.use].magBullets = weapon[weapon.use].magBullets - 1
 				weapon.canShootTimer = weapon[weapon.use].fireRate
 				weapon.canShoot = false
@@ -151,21 +140,12 @@ function weaponUpdate(dt)
 	end
 end
 
-function createBullet()
-	local mx, my = lm.getX()+lg.getWidth(), lm.getY()+lg.getHeight()
-	local x, y = player.x, player.y
-	local dis, angle = checkDis(x, y, mx, my)
-	bullets[#bullets+1] = bullet:new(x, y, angle, weapon[weapon.use].damage)
-end
-
 	---------------------------------------------
 
 function rotateGun(dt)
-	local mx, my = lm.getX() + player.x, lm.getY() + player.y
-	local dis, angle = checkDis(mx, my, player.x, player.y)
+	local dis, angle = checkDis(player.x, player.y, mouseX, mouseY)
 
 	gun.x = player.x + math.sin(angle) * gun.dis
 	gun.y = player.y + math.cos(-angle) * gun.dis
-
 end
 

@@ -18,30 +18,30 @@ function gameLoad()
 	player = player:new(1000, 1000)
 
 	weaponLoad()
-	
-	zombies = {}
-
-	for i = 1, 20 do
-		local x = math.random(player.x - lg.getWidth()/2, player.x + lg.getWidth()/2)
-		local y = math.random(player.y - lg.getHeight()/2, player.y + lg.getHeight()/2)
-		local rad = 30
-		local speed = math.random(5, 15)
-		local health = 100
-
-		zombies[i] = zombie:new(x, y, rad, speed, health)
-	end
-
+	zombiesLoad()
 	hudLoad()
 
 end
 
 function gameUpdate(dt)
+	spawnZombies(dt)
+	
 	for i, bullet in ipairs(bullets) do
 		bullet:update(dt)
+		for j, zombie in ipairs(zombies) do
+			local dis, angle = checkDis(bullet.x, bullet.y, zombie.x, zombie.y)
+			if dis < zombie.rad then
+				table.remove(bullets, i)
+				zombie.health = zombie.health - bullet.damage
+			end
+		end
 	end
 
 	for i, zombie in ipairs(zombies) do
 		zombie:update(dt)
+		if zombie.health <= 0 then
+			table.remove(zombies, i)
+		end
 	end
 
 	player:update(dt)
@@ -57,6 +57,10 @@ function gameDraw()
 
 	for i, bullet in ipairs(bullets) do 		--bullets
 		bullet:draw()
+
+
+
+
 	end
 
 	lg.setColor(120, 120, 120, 150)	
@@ -92,7 +96,7 @@ function gameKey(key, i)
 		elseif key == "5" then
 			weapon.use = 5
 		elseif key == "r" then
-			if weapon[weapon.use].magBullets < weapon[weapon.use].magMax then
+			if weapon[weapon.use].magBullets < weapon[weapon.use].magMax and weapon[weapon.use].allBullets > 0 then
 				weapon.canShoot = false
 				weapon.isReloading = true
 				weapon.canShootTimer = weapon[weapon.use].reloadTime
@@ -116,7 +120,7 @@ function checkDis(x1, y1, x2, y2)
 	local tx = x2 - x1
 	local ty = y2 - y1
 
-	local angle = (math.atan2(ty, tx) / math.pi*180)
+	local angle = math.atan2(ty, tx)
 	local dis = ((tx^2) + (ty^2))
 	dis = math.sqrt(dis)
 return dis, angle

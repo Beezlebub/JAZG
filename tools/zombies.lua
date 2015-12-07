@@ -8,10 +8,6 @@ function zombie:initialize(x, y)
 	self.health = 100
 end
 
-function zombie:remove()
-	table.remove(zombies, i)
-end
-
 function zombie:update(dt)
 	local canMove = true
 	for i, zombie in ipairs(zombies) do
@@ -34,12 +30,45 @@ function zombie:update(dt)
 			self.y = self.y - self.speed * dt
 		end
 	end
-
-	if self.health < 1 then
-		zombie:remove(self)
-	end
 end
 
 function zombie:draw(color)
 	drawCircle(self, color)
 end
+
+
+function zombiesLoad()
+	zombies = {}
+	zombies.canSpawn = true
+	zombies.spawnTimer = 0
+	zombies.timerMax = 5
+	zombies.maxNum = 30
+
+	for i = 1, 20 do
+		local x = math.random(player.x - lg.getWidth()/2, player.x + lg.getWidth()/2)
+		local y = math.random(player.y - lg.getHeight()/2, player.y + lg.getHeight()/2)
+		local rad = 30
+		local speed = math.random(5, 15)
+		local health = 100
+
+		zombies[i] = zombie:new(x, y, rad, speed, health)
+	end
+end
+
+function spawnZombies(dt)
+	if zombies.spawnTimer > 0 then
+		zombies.spawnTimer = zombies.spawnTimer - 1 * dt
+	else
+		if #zombies < zombies.maxNum then
+			local x = math.random(player.x - lg.getWidth()/2, player.x + lg.getWidth()/2)
+			local y = math.random(player.y - lg.getHeight()/2, player.y + lg.getHeight()/2)
+			local rad = 30
+			local speed = math.random(5, 15)
+			local health = 100
+
+			zombies[#zombies+1] = zombie:new(x, y, rad, speed, health)
+			zombies.spawnTimer = zombies.timerMax
+		end
+	end
+end
+
