@@ -7,8 +7,8 @@ function hudLoad()
 	camSettings.rot = 0
 
     lm.setCursor(lm.getSystemCursor("crosshair"))
-    lg.setPointSize(3)
-    lg.setPointStyle("rough")
+    lg.setPointSize(5)
+    lg.setPointStyle("smooth")
 
 	---------------------------------------------
 
@@ -27,23 +27,49 @@ function hudLoad()
 	hud.weapon.ammo.h = 40
 
 	hud.weapon.reload = {}
-	hud.weapon.reload.x = hud.weapon.x
-	hud.weapon.reload.y = hud.weapon.y - 30
-	hud.weapon.reload.w = hud.weapon.w
-	hud.weapon.reload.h = 20
+	hud.weapon.reload.x = 0
+	hud.weapon.reload.y = 0
+	hud.weapon.reload.w = 50
+	hud.weapon.reload.h = 10
 
 end
 
 function hudUpdate(dt)
 	camSettings.x = -player.x + player.rad
 	camSettings.y = -player.y + player.rad
+	hud.weapon.reload.x = player.x - hud.weapon.reload.w/2
+	hud.weapon.reload.y = player.y - 50
+
+	
+	local mx, my = lm.getX() + (-player.x + lg.getWidth()/2), lm.getY() + (-player.x + lg.getHeight()/2)
+	local dis, angle = checkDis(mx, my, player.x, player.y)
+	tDis = dis
+	tAngle = angle
+
 end
 
 function hud1Draw()
+	if weapon.isReloading then
+		lg.setColor(80, 80, 80)
+		lg.rectangle("line", hud.weapon.reload.x, hud.weapon.reload.y, hud.weapon.reload.w, hud.weapon.reload.h)
+
+		local tw = hud.weapon.reload.w - (hud.weapon.reload.w * (weapon.canShootTimer / weapon[weapon.use].reloadTime))
+		lg.setColor(180, 50, 50)
+		lg.rectangle("fill", hud.weapon.reload.x, hud.weapon.reload.y+1, tw, hud.weapon.reload.h-2)
+
+
+		--lg.setColor(180, 50, 50)
+		--lg.printf("RELOADING", hud.weapon.reload.x, hud.weapon.reload.y - 20, hud.weapon.reload.w, "center")
+	end
 
 end
 
 function hud2Draw()
+
+	lg.setColor(255, 255, 255)
+	lg.print(tDis, 10, 10)
+	lg.print(tAngle, 10, 30)
+
 	drawRect(hud.weapon, {80,80,80})
 	drawRect(hud.weapon.ammo, {180,180,80})
 
@@ -63,17 +89,5 @@ function hud2Draw()
 		lg.rectangle("fill", hud.weapon.ammo.x, hud.weapon.ammo.y, tw, hud.weapon.ammo.h)
 	end
 
-	if weapon.isReloading then
-		lg.setColor(80, 80, 80)
-		lg.rectangle("line", hud.weapon.reload.x, hud.weapon.reload.y, hud.weapon.reload.w, hud.weapon.reload.h)
-
-		local tw = hud.weapon.reload.w - (hud.weapon.reload.w * (weapon.canShootTimer / weapon[weapon.use].reloadTime))
-		lg.setColor(180, 50, 50)
-		lg.rectangle("fill", hud.weapon.reload.x, hud.weapon.reload.y+1, tw, hud.weapon.reload.h-2)
-
-
-		lg.setColor(180, 50, 50)
-		lg.printf("RELOADING", hud.weapon.reload.x, hud.weapon.reload.y - 20, hud.weapon.reload.w, "center")
-	end
-
+	
 end

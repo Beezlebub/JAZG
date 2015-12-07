@@ -1,8 +1,52 @@
+bullet = class('bullet')
+
+function bullet:initialize(x, y, angle, damage)
+	self.x = gun.x
+	self.y = gun.y
+	self.damage = damage
+
+	local dis, angle = checkDis(self.x, self.y, x, y)
+	self.angle = angle
+end
+
+function bullet:remove()
+	table.remove(bullets, i)
+end
+
+function bullet:update(dt)
+	self.x = self.x + math.sin(self.angle) * bulletSpeed * dt
+	self.y = self.y + math.cos(-self.angle) * bulletSpeed * dt
+
+	for i = #zombie, 1, -1 do
+		local dis, angle = checkDis(self.x, self.y, zombie[i].x, zombie[i].y)
+		if dis < zombie[i].rad then
+			zombie[i].health = zombie[i].health - self.damage
+			bullet:remove(self)
+		end
+	end
+
+end
+
+function bullet:draw(color)
+	lg.point(self.x, self.y)
+end
+
+	---------------------------------------------
 
 function weaponLoad()
 	
-	weapon = {}
+	gun = {}
+	gun.x = 0
+	gun.y = 0
+	gun.rad = 10
+	gun.dis = 40
 
+	bullets = {}
+	bulletSpeed = 200
+
+	---------------------------------------------
+
+	weapon = {}
 	weapon.btnDown = false
 	weapon.isReloading = false
 	weapon.canShoot = true
@@ -15,9 +59,9 @@ function weaponLoad()
 	weapon[1].magBullets = 9
 	weapon[1].magMax = 9
 	weapon[1].allBullets = 48
-	weapon[1].fireRate = 0.2
+	weapon[1].fireRate = 0.01
 	weapon[1].fireMode = 0
-	weapon[1].reloadTime = 2
+	weapon[1].reloadTime = 1.5
 
 	weapon[2] = {}
 	weapon[2].name = "SMG"
@@ -26,26 +70,24 @@ function weaponLoad()
 	weapon[2].magMax = 30
 	weapon[2].allBullets = 90
 	weapon[2].fireRate = 0.2
-	weapon[2].fireMode = 1
 	weapon[2].reloadTime = 2
 
 	weapon[3] = {}
-	weapon[3].name = "MG"
-	weapon[3].damage = 25
+	weapon[3].name = "LMG"
+	weapon[3].damage = 20
 	weapon[3].magBullets = 75
 	weapon[3].magMax = 75
 	weapon[3].allBullets = 300
-	weapon[3].fireRate = 0.15
-	weapon[3].fireMode = 1
+	weapon[3].fireRate = 0.1
 	weapon[3].reloadTime = 5
 
 	weapon[4] = {}
-	weapon[4].name = "AR"
+	weapon[4].name = "DMR"
 	weapon[4].damage = 50
-	weapon[4].magBullets = 25
-	weapon[4].magMax = 25
+	weapon[4].magBullets = 12
+	weapon[4].magMax = 12
 	weapon[4].allBullets = 75
-	weapon[4].fireRate = .2
+	weapon[4].fireRate = .01
 	weapon[4].fireMode = 0
 	weapon[4].reloadTime = 2.5
 
@@ -56,18 +98,33 @@ function weaponLoad()
 	weapon[5].magBullets = 7
 	weapon[5].magMax = 7
 	weapon[5].allBullets = 21
-	weapon[5].fireRate = 4
+	weapon[5].fireRate = .2
 	weapon[5].fireMode = 0
 	weapon[5].reloadTime = 3.0
-
-	---------------------------------------------
-
-	bullets = {}
-	bulletSpeed = 200
-
 end
 
 function weaponUpdate(dt)
+
+	if lm.isDown("l") then weapon.btnDown = true else weapon.btnDown = false end
+
+	rotateGun(dt)
+
+	if not weapon.isReloading and weapon.btnDown then
+		if weapon.canShoot then
+			if weapon[weapon.use].magBullets > 0 then
+				createBullet()
+				weapon[weapon.use].magBullets = weapon[weapon.use].magBullets - 1
+				weapon.canShootTimer = weapon[weapon.use].fireRate
+				weapon.canShoot = false
+			end
+		else
+			if weapon[weapon.use].fireMode == 0 then 
+				weapon.canShootTimer = weapon[weapon.use].fireRate
+			end
+		end
+	end
+
+	---------------------------------------------
 
 	if weapon.canShootTimer > 0 then
 		weapon.canShootTimer = weapon.canShootTimer - 1 * dt
@@ -85,7 +142,6 @@ function weaponUpdate(dt)
 		weapon.canShoot = true
 	end
 
-
 	if weapon[weapon.use].magBullets == 0 and not weapon.isReloading then
 		if weapon[weapon.use].allBullets > 0 then
 			weapon.canShootTimer = weapon[weapon.use].reloadTime
@@ -93,48 +149,23 @@ function weaponUpdate(dt)
 			weapon.isReloading = true
 		end
 	end
-
-	---------------------------------------------
-
-	if lm.isDown("l") then
-		if weapon.canShoot and weapon[weapon.use].magBullets > 0 then
-			createBullet()
-			weapon[weapon.use].magBullets = weapon[weapon.use].magBullets - 1
-			weapon.canShootTimer = weapon[weapon.use].fireRate
-			weapon.canShoot = false
-			weapon.btnDown = true
-		end
-	else
-		weapon.btnDown = false
-	end
-
-	if weapon[weapon.use].fireMode == 0 and weapon.btnDown then
-		weapon.canShootTimer = weapon[weapon.use].fireRate
-	end
-
-	---------------------------------------------
-
-	for i, bullet in ipairs(bullets) do
-		bullet[1] = bullet[1] + bullet[3] * bulletSpeed * dt
-		bullet[2] = bullet[2] + -bullet[3] * bulletSpeed * dt
-	end
-
 end
 
 function createBullet()
-	local mx, my = lm.getPosition()
+	local mx, my = lm.getX()+lg.getWidth(), lm.getY()+lg.getHeight()
 	local x, y = player.x, player.y
-	local dis, angle = checkDis(mx, my, x, y)
-
-	bullets[#bullets+1] = {x, y, angle, weapon[weapon.use].damage}
+	local dis, angle = checkDis(x, y, mx, my)
+	bullets[#bullets+1] = bullet:new(x, y, angle, weapon[weapon.use].damage)
 end
 
-function removeBullet(i)
-	table.remove(bullets, i)
+	---------------------------------------------
+
+function rotateGun(dt)
+	local mx, my = lm.getX() + player.x, lm.getY() + player.y
+	local dis, angle = checkDis(mx, my, player.x, player.y)
+
+	gun.x = player.x + math.sin(angle) * gun.dis
+	gun.y = player.y + math.cos(-angle) * gun.dis
+
 end
 
-function weaponDraw()
-	for i, bullet in ipairs(bullets) do
-		lg.point(bullet[1], bullet[2])
-	end
-end

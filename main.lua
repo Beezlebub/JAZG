@@ -20,3 +20,4 @@ end
 function love.keypressed(key, i)
 	gameKey(key, i)
 end
+

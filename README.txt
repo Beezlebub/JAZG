@@ -7,8 +7,8 @@ Made with Love2D
 --  Controls --
 
 W,A,S,D		-	Control Player
-1-5		-	Change Weapon
 R		-	Reload Weapon
+1-5		-	Change Weapon
 Left Mouse	-	Fire Weapon
 
 --  Other  --

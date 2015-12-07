@@ -1,35 +1,45 @@
+zombie = class('zombie')
 
-function zombiesLoad()
-	zombie = {}
+function zombie:initialize(x, y)
+	self.x = x
+	self.y = y
+	self.rad = 20
+	self.speed = math.random(10, 30)
+	self.health = 100
+end
 
-	for i = 1, 20 do
-		zombie[i] = {}
-		zombie[i].x = math.random(player.x - lg.getWidth()/2, player.x + lg.getWidth()/2)
-		zombie[i].y = math.random(player.y - lg.getHeight()/2, player.y + lg.getHeight()/2)
-		zombie[i].rad = 10
-		zombie[i].speed = math.random(5, 15)
-		zombie[i].health = 100
+function zombie:remove()
+	table.remove(zombies, i)
+end
+
+function zombie:update(dt)
+	local canMove = true
+	for i, zombie in ipairs(zombies) do
+		local dis, angle = checkDis(self.x, self.y, zombie.x, zombie.y)
+		if dis < zombie.rad*2 then
+			if self ~= zombie then canMove = false end
+		end
+	end
+
+	if canMove then
+		if player.x > self.x then
+			self.x = self.x + self.speed * dt
+		else
+			self.x = self.x - self.speed * dt
+		end
+
+		if player.y > self.y then
+			self.y = self.y + self.speed * dt
+		else
+			self.y = self.y - self.speed * dt
+		end
+	end
+
+	if self.health < 1 then
+		zombie:remove(self)
 	end
 end
 
-function zombiesUpdate(dt)
-	for i = #zombie, 1, -1 do
-		if player.x > zombie[i].x then
-			zombie[i].x = zombie[i].x + zombie[i].speed * dt
-		else
-			zombie[i].x = zombie[i].x - zombie[i].speed * dt
-		end
-
-		if player.y > zombie[i].y then
-			zombie[i].y = zombie[i].y + zombie[i].speed * dt
-		else
-			zombie[i].y = zombie[i].y - zombie[i].speed * dt
-		end
-	end
-end
-
-function zombiesDraw()
-	for i = #zombie, 1, -1 do
-		drawCircle(zombie[i], {200,50,50} )
-	end
+function zombie:draw(color)
+	drawCircle(self, color)
 end
